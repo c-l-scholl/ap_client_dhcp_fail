@@ -1,0 +1,10 @@
+#ignore everything
+*
+#except
+!main.py
+!615_serials.xlsx
+!secrets_example.yaml
+!README.md
+!apis.yaml
+!.gitignore
+!requirements.txt

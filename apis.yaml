@@ -1,0 +1,13 @@
+rest_gateway:
+  url: https://internal-apigw.central.arubanetworks.com
+  port: 443
+refresh: 
+  method: POST
+  uri: /oauth2/token
+get_per_ap:
+  method: GET
+  uri: /configuration/v1/ap_settings_cli/ #make sure to append serial number to call
+post_per_ap:
+  method: POST
+  uri: /configuration/v1/ap_settings_cli/ #make sure to append serial number to call
+  
