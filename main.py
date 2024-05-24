@@ -58,29 +58,26 @@ def main():
     secrets = load_yaml("secrets.yaml")
     apis = load_yaml("apis.yaml")
     base_rest_gateway = apis["rest_gateway"]["url"]
-    df = pd.read_excel("615_serials.xlsx")
+    data = pd.read_excel("aps_serials.xlsx").to_dict()
     ap_cli = {}
     get_per_ap_method = apis["get_per_ap"]["method"]
     get_per_ap_uri = apis["get_per_ap"]["uri"]
     post_per_ap_method = apis["post_per_ap"]["method"]
     post_per_ap_uri = apis["post_per_ap"]["uri"]
     #get ap cli 
-    for ap in df["serial number"].to_list():
-        r = make_request(get_per_ap_method, base_rest_gateway, get_per_ap_uri + ap, token = secrets["access_token"])
-        ap_cli[ap] = r
-    #uncomment to see print of full ap by ap config    
-    #pprint(ap_cli)
-    #change parameter based on key word - changing the keyword changes the matched line. If it matches multiple times, multiple lines will be replaced. 
-    for ap in ap_cli.keys():
-        for index, content in enumerate(ap_cli[ap]):
-            if "flex-dual-band" in content:
-                ap_cli[ap][index] = "  flex-dual-band 5GHz-and-2.4GHz"
-            ap_cli[ap].append("  flex-dual-band 5GHz-and-2.4GHz")
+    for index,serial in data["serial number"].items():
+        r = make_request(get_per_ap_method, base_rest_gateway, get_per_ap_uri + serial, token = secrets["access_token"])
+        ap_cli[index] = r
+    # uncomment to see print of full ap by ap config    
+    pprint(ap_cli) 
+    for ap_index in ap_cli.keys():
+        for index, content in enumerate(ap_cli[ap_index]):
+            if "hostname" in content:
+                ap_cli[ap_index][index] = f"  hostname {data["hostname"][ap_index]}"          
     #push to aps in list by AP      
-    for ap in ap_cli.keys():
-        post_per_ap_parameters = {"clis" : ap_cli[ap]}
-        print(post_per_ap_parameters)
-        r = make_request(post_per_ap_method, base_rest_gateway, post_per_ap_uri + ap, post_per_ap_parameters, token = secrets["access_token"]) 
+    for ap_index in ap_cli.keys():
+        post_per_ap_parameters = {"clis" : ap_cli[ap_index]}
+        r = make_request(post_per_ap_method, base_rest_gateway, post_per_ap_uri + data["serial number"][ap_index], post_per_ap_parameters, token = secrets["access_token"]) 
         print(f"success pushing to {r}")
 if __name__ == "__main__":
     main()
