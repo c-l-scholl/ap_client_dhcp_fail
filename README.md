@@ -7,5 +7,5 @@ modify ap name via serial with excel upload
 4. rename the secrets file "secrets.yaml"
 5. modify your apis.yaml file updating the base api gateway url. 
 6. export serials from aruba central for all aps and put them in the aps_serials.xlsx file. 
-7. run the script with /path/to/venv/interpreter/python.exe /path/to/script/directory/man.py
+7. run the script with /path/to/venv/interpreter/python.exe /path/to/script/directory/main.py
 
