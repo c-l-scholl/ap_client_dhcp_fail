@@ -1,5 +1,5 @@
 rest_gateway:
-  url: https://internal-apigw.central.arubanetworks.com
+  url: https://apigw-uswest4.central.arubanetworks.com
   port: 443
 refresh: 
   method: POST

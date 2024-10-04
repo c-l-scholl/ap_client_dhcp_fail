@@ -18,8 +18,8 @@ def make_request(verb, base_url, uri, parameters: dict = {}, token = ""):
         return response
     except requests.exceptions.RequestException as e:
         pprint(f"""Something happened with the request. 
-Status Code: {r.status_code} 
-Exception: {e.__class__.__name__} {e}""")
+                Status Code: {r.status_code} 
+                Exception: {e.__class__.__name__} {e}""")
         pprint(r.json())
     except Exception as e:
         print(f"Something went wrong: {e.__class__.__name__} {e}")
@@ -65,7 +65,7 @@ def main():
     post_per_ap_method = apis["post_per_ap"]["method"]
     post_per_ap_uri = apis["post_per_ap"]["uri"]
     #get ap cli 
-    for index,serial in data["serial number"].items():
+    for index, serial in data["serial number"].items():
         r = make_request(get_per_ap_method, base_rest_gateway, get_per_ap_uri + serial, token = secrets["access_token"])
         ap_cli[index] = r
     # uncomment to see print of full ap by ap config    
