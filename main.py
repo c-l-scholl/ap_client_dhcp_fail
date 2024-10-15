@@ -110,7 +110,6 @@ def main():
             excess_failure_aps.append(ap_name)
 
     if excess_failure_aps:
-        # send email to Christian, Avi, and me
         print("APs with 10+ DHCP disconnects:", excess_failure_aps)
 
     """
