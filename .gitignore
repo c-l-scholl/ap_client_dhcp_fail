@@ -2,7 +2,6 @@
 *
 #except
 !main.py
-!aps_serials.xlsx
 !secrets_example.yaml
 !README.md
 !apis.yaml

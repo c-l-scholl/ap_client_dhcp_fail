@@ -10,4 +10,6 @@ get_per_ap:
 post_per_ap:
   method: POST
   uri: /configuration/v1/ap_settings_cli/ #make sure to append serial number to call
-  
+get_unified_clients:
+  method: GET
+  uri: /monitoring/v2/clients?

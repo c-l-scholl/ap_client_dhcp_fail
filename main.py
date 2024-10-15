@@ -3,61 +3,113 @@ import requests
 from pprint import pprint
 import yaml
 
-def make_request(verb, base_url, uri, parameters: dict = {}, token = ""):
+
+def make_request(verb, base_url, uri, parameters: dict = {}, token=""):
     """make request, return response"""
-    try: 
+    try:
         request_headers = {}
         if token != "":
             request_headers = {
                 "accept": "application/json",
-                "authorization": f"Bearer {token}"
+                "authorization": f"Bearer {token}",
             }
-        r = requests.request(method = verb, url = base_url + uri, json = parameters, headers=request_headers)
+        r = requests.request(
+            method=verb, url=base_url + uri, json=parameters, headers=request_headers
+        )
         r.raise_for_status()
         response = r.json()
         return response
     except requests.exceptions.RequestException as e:
-        pprint(f"""Something happened with the request. 
+        pprint(
+            f"""Something happened with the request. 
                 Status Code: {r.status_code} 
-                Exception: {e.__class__.__name__} {e}""")
+                Exception: {e.__class__.__name__} {e}"""
+        )
         pprint(r.json())
     except Exception as e:
         print(f"Something went wrong: {e.__class__.__name__} {e}")
 
+
 def load_yaml(filename):
-    with open(file = filename, mode = "r") as f:
+    with open(file=filename, mode="r") as f:
         loaded = yaml.safe_load(f)
     return loaded
 
-def refresh_token(api_gateway_file: str = "apis.yaml", secrets_file: str = "secrets.yaml") -> dict:
+
+def refresh_token(
+    api_gateway_file: str = "apis.yaml", secrets_file: str = "secrets.yaml"
+) -> dict:
     """refresh token and update secrets file"""
-    #import gateway url and uri's from yaml
+    # import gateway url and uri's from yaml
     api_gateway_uri = load_yaml(api_gateway_file)
     rest_gateway = api_gateway_uri["rest_gateway"]["url"]
     refresh_method = api_gateway_uri["refresh"]["method"]
     refresh_uri = api_gateway_uri["refresh"]["uri"]
-    #import secrets from yaml
+    # import secrets from yaml
     secrets = load_yaml(secrets_file)
-    refresh_params= {"client_id" : secrets["client_id"],
-                       "client_secret" : secrets["client_secret"],
-                       "grant_type" : "refresh_token",
-                       "refresh_token" : secrets["refresh_token"]}
-    #request refresh
-    refresh_token = make_request(refresh_method, rest_gateway, refresh_uri, refresh_params)
-#update secrets
+    refresh_params = {
+        "client_id": secrets["client_id"],
+        "client_secret": secrets["client_secret"],
+        "grant_type": "refresh_token",
+        "refresh_token": secrets["refresh_token"],
+    }
+    # request refresh
+    refresh_token = make_request(
+        refresh_method, rest_gateway, refresh_uri, refresh_params
+    )
+    # update secrets
     secrets["access_token"] = refresh_token["access_token"]
     secrets["refresh_token"] = refresh_token["refresh_token"]
-    with open(file = secrets_file, mode = "w") as yf:
+    with open(file=secrets_file, mode="w") as yf:
         yaml.dump(secrets, yf, default_flow_style=False)
         print("secret update successful")
 
+
 def main():
-    #refresh token and update secrets file
+    # refresh token and update secrets file
     refresh_token()
-    #load fresh secrets and apis for work
+    # load fresh secrets and apis for work
     secrets = load_yaml("secrets.yaml")
     apis = load_yaml("apis.yaml")
     base_rest_gateway = apis["rest_gateway"]["url"]
+    get_unified_clients_method = apis["get_unified_clients"]["method"]
+    get_unified_clients_uri = apis["get_unified_clients"]["uri"]
+    timerange = "3H"
+    client_type = "WIRELESS"
+    client_status = "FAILED_TO_CONNECT"
+    # request_limit = "limit=10&"
+    unified_clients_vars = "timerange={}&client_type={}&client_status={}".format(
+        timerange, client_type, client_status
+    )
+    bad_aps = {}
+    r = make_request(
+        get_unified_clients_method,
+        base_rest_gateway,
+        get_unified_clients_uri + unified_clients_vars,
+        token=secrets["access_token"],
+    )
+    failed_ap_list = r["clients"]
+    # print(failed_ap_list)
+    for ap in failed_ap_list:
+        device_name = ap["associated_device_name"]
+        failure_stage = ap["failure_stage"]
+        if failure_stage == "DHCP":
+            bad_aps[device_name] = 1 + bad_aps.get(device_name, 0)
+
+    # Uncomment to see list of APs with DHCP connections
+    # pprint(bad_aps)
+
+    excess_failure_aps = []
+    BAD_AP_FAIL_LIMIT = 10
+    for ap_name, num_fails in bad_aps.items():
+        if num_fails >= BAD_AP_FAIL_LIMIT:
+            excess_failure_aps.append(ap_name)
+
+    if excess_failure_aps:
+        # send email to Christian, Avi, and me
+        print(excess_failure_aps)
+
+    """
     data = pd.read_excel("aps_serials.xlsx").to_dict()
     ap_cli = {}
     get_per_ap_method = apis["get_per_ap"]["method"]
@@ -79,5 +131,8 @@ def main():
         post_per_ap_parameters = {"clis" : ap_cli[ap_index]}
         r = make_request(post_per_ap_method, base_rest_gateway, post_per_ap_uri + data["serial number"][ap_index], post_per_ap_parameters, token = secrets["access_token"]) 
         print(f"success pushing to {r}")
+    """
+
+
 if __name__ == "__main__":
     main()
