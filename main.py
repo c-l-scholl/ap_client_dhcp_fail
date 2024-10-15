@@ -74,6 +74,7 @@ def main():
     base_rest_gateway = apis["rest_gateway"]["url"]
     get_unified_clients_method = apis["get_unified_clients"]["method"]
     get_unified_clients_uri = apis["get_unified_clients"]["uri"]
+    
     timerange = "3H"
     client_type = "WIRELESS"
     client_status = "FAILED_TO_CONNECT"
@@ -89,7 +90,8 @@ def main():
         token=secrets["access_token"],
     )
     failed_ap_list = r["clients"]
-    # print(failed_ap_list)
+
+    # find disconnects of type DHCP
     for ap in failed_ap_list:
         device_name = ap["associated_device_name"]
         failure_stage = ap["failure_stage"]
@@ -97,8 +99,10 @@ def main():
             bad_aps[device_name] = 1 + bad_aps.get(device_name, 0)
 
     # Uncomment to see list of APs with DHCP connections
-    # pprint(bad_aps)
+    print("APs with DHCP disconnects:")
+    pprint(bad_aps)
 
+    
     excess_failure_aps = []
     BAD_AP_FAIL_LIMIT = 10
     for ap_name, num_fails in bad_aps.items():
@@ -107,7 +111,7 @@ def main():
 
     if excess_failure_aps:
         # send email to Christian, Avi, and me
-        print(excess_failure_aps)
+        print("APs with 10+ DHCP disconnects:", excess_failure_aps)
 
     """
     data = pd.read_excel("aps_serials.xlsx").to_dict()
