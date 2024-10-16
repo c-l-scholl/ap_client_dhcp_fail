@@ -102,7 +102,7 @@ def main():
     print("APs with DHCP disconnects:")
     pprint(bad_aps)
 
-    
+    # Note APs with over 10+ DHCP failures
     excess_failure_aps = []
     BAD_AP_FAIL_LIMIT = 10
     for ap_name, num_fails in bad_aps.items():
