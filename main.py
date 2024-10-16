@@ -78,7 +78,7 @@ def main():
     timerange = "3H"
     client_type = "WIRELESS"
     client_status = "FAILED_TO_CONNECT"
-    # request_limit = "limit=10&"
+    request_limit = "limit=300&"
     unified_clients_vars = "timerange={}&client_type={}&client_status={}".format(
         timerange, client_type, client_status
     )
@@ -86,7 +86,7 @@ def main():
     r = make_request(
         get_unified_clients_method,
         base_rest_gateway,
-        get_unified_clients_uri + unified_clients_vars,
+        get_unified_clients_uri + request_limit + unified_clients_vars,
         token=secrets["access_token"],
     )
     failed_ap_list = r["clients"]
