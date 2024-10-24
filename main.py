@@ -75,10 +75,10 @@ def main():
     get_unified_clients_method = apis["get_unified_clients"]["method"]
     get_unified_clients_uri = apis["get_unified_clients"]["uri"]
     
-    timerange = "3H"
+    timerange = "1D" # Options: 3H, 1D, 1W
     client_type = "WIRELESS"
     client_status = "FAILED_TO_CONNECT"
-    request_limit = "limit=300&"
+    request_limit = "limit=1000&"
     unified_clients_vars = "timerange={}&client_type={}&client_status={}".format(
         timerange, client_type, client_status
     )
